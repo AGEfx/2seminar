@@ -11,13 +11,13 @@ m <- matrix(c(0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,-1,0,0,-1,0,
 
 
 
-start <- c(10,1) #синий цвет
-finish <- c(9,20) #фиолетовый цвет
+start <- c(10,1) #СЃРёРЅРёР№ С†РІРµС‚
+finish <- c(3,18) #С„РёРѕР»РµС‚РѕРІС‹Р№ С†РІРµС‚
 
 m[start[1],start[2]] <- 1
-d <- 2 #длина волны
+d <- 2 #РґР»РёРЅР° РІРѕР»РЅС‹
 
-wave <- TRUE #метка отвечающая за возможность распространения волны
+wave <- TRUE #РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ СЂР°СЃРїСЂРѕСЃС‚СЂР°РЅРµРЅРёСЏ РІРѕР»РЅС‹
 
 while(wave == TRUE && m[finish[1],finish[2]]==0) {
   wave <- FALSE
@@ -47,12 +47,12 @@ while(wave == TRUE && m[finish[1],finish[2]]==0) {
   d <- d + 1
 }
 
-m #вывод модифицированной матрицы
+m #РІС‹РІРѕРґ РјР°С‚СЂС†РёС‹
 
 
 if(m[finish[1],finish[2]]>0){
   path <- c()
-  d <- d - 1 #т.к его значение мы лишний раз в цикле на последнем шаге увеличили
+  d <- d - 1  #С‚.Рє РµРіРѕ Р·РЅР°С‡РµРЅРёРµ РјС‹ Р»РёС€РЅРёР№ СЂР°Р· РІ С†РёРєР»Рµ РЅР° РїРѕСЃР»РµРґРЅРµРј С€Р°РіРµ СѓРІРµР»РёС‡РёР»Рё
   
   x <- finish[1]
   y <- finish[2]
@@ -87,17 +87,17 @@ if(m[finish[1],finish[2]]>0){
 colors <- c()
 for(i in 1:nrow(m)) {
   for (j in 1:ncol(m)) {
-    if (m[i, j] == -1) { #стена
+    if (m[i, j] == -1) { #СЃС‚РµРЅР°
       colors <- append(colors, "black")
-    }else if(m[i, j] == 1){ #начальная вершина
+    }else if(m[i, j] == 1){ #РЅР°С‡Р°Р»СЊРЅР°СЏ РІРµСЂС€РёРЅР°
       colors <- append(colors,"blue")
-    }else if(i == finish[1] && j == finish[2]){ #конечная
+    }else if(i == finish[1] && j == finish[2]){ #РєРѕРЅРµС‡РЅР°СЏ
       colors <- append(colors,"purple")
     } else if(paste(i,j) %in% path){
-      colors <- append(colors, "red") #путь
+      colors <- append(colors, "red") #РїСѓС‚СЊ
     }
     else{
-      colors <- append(colors, "green") #пустые
+      colors <- append(colors, "green") #РїСѓСЃС‚С‹Рµ
     }
   }
 }
@@ -112,5 +112,5 @@ plot(c(rep(seq(1,ncol(m)),nrow(m))),
 axis(1, at = 1:ncol(m))
 axis(2, at = -nrow(m):-1)
 }else{
-  print("Пути нет")
+  print("???? ???")
 }
