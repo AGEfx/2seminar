@@ -1,11 +1,15 @@
+library(igraph)
+
+#тут находим что-то минимульное, но я не помню что
 minn <- function(metki,were){
   min <- Inf
-  x <- 1
-  if(is.null(were)){ #РµСЃР»Рё РІРµРєС‚РѕСЂ РїСѓСЃС‚РѕР№
+  x <- 1 #номер минимальной вершины
+  if(is.null(were)){ #если вектор пустой
     were[1] <- -1
   }
+  
   for(i in 1:length(metki)){
-    if(metki[i] < min && all(i!=were)){
+    if(metki[i] < min && all(i!=were)){ #находим минимальную метку в вершине в которой еще не были
       min <- metki[i]
       x <- i
     }
@@ -23,14 +27,28 @@ a <- matrix(c(0, 7 ,9 ,0, 0,14,
 
 
 
-begin <- 1 #РЅР°С‡Р°Р»СЊРЅР°СЏ РІРµСЂС€РёРЅР°
-end <- 6 #Р·Р°РґР°С‚СЊ РєРѕРЅРµС‡РЅСѓСЋ РІРµСЂС€РёРЅСѓ
+begin <- 2 #начальная вершина
+end <- 5 #задать конечную вершину
 
-n <- sqrt(length(a))
+isGood <- TRUE #флажок, означающий, что начальная вершина меньше конечной
 
-metki <- c() #РјРµС‚РєРё
-were <- c() #РІРµСЂС€РёРЅС‹ РІ РєРѕС‚РѕСЂС‹С… СѓР¶Рµ Р±С‹Р»Рё
+if(begin > end){ #если меньше меняем местами
+  t <- begin
+  begin <- end
+  end <- t
+  
+  isGood <- FALSE #флажок в фолз
+}
 
+
+n <- sqrt(length(a)) #размерность матрицы
+
+metki <- c() #метки
+were <- c() #вершины в которых уже были
+
+
+
+#расставляем бесконечные метки всем вершинам, кроме первой
 metki[begin] <- 0
 for(i in 1:n){
   if(i != begin){
@@ -38,55 +56,91 @@ for(i in 1:n){
   }
 }
 
+#переопределяем метки для всех вершин
 while(TRUE){
-  current <- minn(metki,were) #С‚РµРєСѓС‰Р°СЏ РІРµСЂС€РёРЅР°
+  current <- minn(metki,were) #текущая вершина
   for (i in 1:n) {
     if (a[current, i] != 0) {
-      rasst <- metki[current] + a[current, i]
+      rasst <- metki[current] + a[current, i] # - расстояние
       if (rasst < metki[i]) {
         metki[i] <- rasst
       }
     }
-  
+    
   }
   were <- append(were,current)
-  if(current == end){
+  if(current == end){ #как доходим до конечной вершины, завершаем процесс
     break
   }
 }
 
-path <- c()
+#исоставляем путь
+path <- c() #массив меток, составляющих путь от начальной до конечно
 while(TRUE){
   current <- end
   for (i in n:1) {
     if(a[i,current] != 0){
       rasst <- metki[current] - a[i, current]
       if(metki[i] == rasst){
+        path <- append(path,current) #делаем 2 раза, потому что так надо, чтобы было удобно дальше
         path <- append(path,current)
         current <- i
       }
     }
   }
-  if(current == begin){
+  if(current == begin){ #если дошли до начальной вершины, заканчиваем алгоритм
+    path <- append(path, current) #делаем 2 раза, потому что так надо, чтобы было удобно дальше
     path <- append(path, current)
     break
   }
 }
 
-format_vertex <- paste("Р’РµСЂС€РёРЅР° -", seq(1,n),"\n", "РџСѓС‚СЊ =", metki)
+format_vertex <- paste("Вершина -", seq(1,n),"\n", "Путь =", metki) #массив с подписями для вершин
+
+colors <- c(ifelse(seq(1,n) %in% path ,1,5)) #массив цветов для вершин пути(если вершина принадлежит путю, то даём ей цвет 1, иначе цвет 5)
+
+graph <- graph.adjacency(a, mode="undirected", weighted=TRUE) #граф смежности по начальной матрице
+
+edges <- get.edgelist(graph) #матрица смежных друг с другом вершин
+edges
+
+path <- path[-1]
+path <- path[-length(path)]
+path <- rev(path)
+
+paths <- matrix(path,nrow=length(path)/2,ncol=2,byrow=TRUE) #из массива пути делаем матрицу, чтобы потом ее удобно было сравнивать с матрице смежных вершин(нужно для раскрашивания пути)
+paths
+
+edges_colors <- c() #массив цветов для линий
+for(i in 1:nrow(edges)){
+  for(j in 1:nrow(paths)){
+    if(all(paths[j,] == edges[i,]) || all(paths[j,] == rev(edges[i,]))){ #если оба элемента из строки матрицы пути равняются какой-либо строке из матрицы смежных вершин, то в массив под номером этой строки пишем 1
+      edges_colors <- append(edges_colors, 1)
+      break
+    }else{
+      if(j == nrow(paths)){ #если не нашли такую строку, то в вектор пишем 5
+        edges_colors <- append(edges_colors,5)
+        
+      }
+    }
+  }
+}
+edges_colors
+
+#рисуем граф,добавляем веса для линий, надписи для вершин, цвета для вершин и цвета для линий
+plot(graph, edge.label=round(E(graph)$weight),vertex.label = format_vertex, vertex.color = colors, edge.color = edges_colors, edge.width = 6)
 
 
-graph <- graph.adjacency(a, mode="undirected", weighted=TRUE)
-
-plot(ig, edge.label=round(E(ig)$weight),vertex.label = format_vertex)
-
-print("РљСЂР°С‚С‡Р°Р№С€РёРµ СЂР°СЃСЃС‚РѕСЏРЅРёСЏ РґРѕ РІСЃРµС… РІРµСЂС€РёРЅ:")
+print("Кратчайшие расстояния до всех вершин:")
 print(metki)
 
-print("РљСЂР°С‚С‡Р°Р№С€РµРµ СЂР°СЃСЃС‚РѕСЏРЅРёРµ РґРѕ РЅРµРѕР±С…РѕРґРёРјРѕР№ РІРµСЂС€РёРЅС‹:")
+print("Кратчайшее расстояние до необходимой вершины:")
 print(metki[end])
 
 
-print("РџСѓС‚СЊ:")
-print(rev(path))
-
+print("Путь:")
+if(isGood){ #выводим путь прямым или обратным образом в зависимости от того, начальная вершина меньше или больше конечной
+  print(rev(path))
+}else{
+  print(path)
+}
