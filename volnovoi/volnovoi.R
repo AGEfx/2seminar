@@ -112,5 +112,5 @@ plot(c(rep(seq(1,ncol(m)),nrow(m))),
 axis(1, at = 1:ncol(m))
 axis(2, at = -nrow(m):-1)
 }else{
-  print("???? ???")
+  print("Пути нет")
 }
